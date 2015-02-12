@@ -102,16 +102,21 @@ Semaphore::V()
 // the test case in the network assignment won't work!
 Lock::Lock(char* debugName) {
     name = debugName;
+#ifdef CHANGED
     available = true;
     ownerThread = NULL;
     queue = new List;
+#endif
     
 }
 Lock::~Lock() {
+#ifdef CHANGED
 	ASSERT(ownerThread == NULL);//should release the lock before calling destructor
 	delete queue;
+#endif
 }
 void Lock::Acquire() {
+#ifdef CHANGED
 	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
 	
 	ASSERT(ownerThread != currentThread);//if a thread acquire twice, asserted. 
@@ -125,9 +130,10 @@ void Lock::Acquire() {
 	ownerThread = currentThread;
 	
 	(void) interrupt->SetLevel(oldLevel);
+#endif
 }
 void Lock::Release() {
-	
+#ifdef CHANGED
 	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
 	
 	ASSERT(!available || ownerThread == currentThread);//cannot release an available lock or call release twice
@@ -139,23 +145,30 @@ void Lock::Release() {
 	ownerThread = NULL;
 	
 	(void) interrupt->SetLevel(oldLevel);
-	
+#endif
 	
 }
 
 bool Lock::isHeldByCurrentThread()
 {
+#ifdef CHANGED
 	return ownerThread == currentThread;
+#endif
 }
 
 Condition::Condition(char* debugName) {
 	name = debugName;
+#ifdef CHANGED
 	queue = new List;
+#endif
 }
-Condition::~Condition() { 
+Condition::~Condition() {
+#ifdef CHANGED
 	delete queue;
+#endif
 }
-void Condition::Wait(Lock* conditionLock) { 
+void Condition::Wait(Lock* conditionLock) {
+#ifdef CHANGED
 	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
 	ASSERT(conditionLock->isHeldByCurrentThread()); //a lock should have been acquired by current thread before Wait
 	
@@ -165,8 +178,10 @@ void Condition::Wait(Lock* conditionLock) {
 	conditionLock->Acquire();//after thread wake up, contonue to have this lock, Mesa-style
 	
 	(void) interrupt->SetLevel(oldLevel);
+#endif
 }
-void Condition::Signal(Lock* conditionLock) { 
+void Condition::Signal(Lock* conditionLock) {
+#ifdef CHANGED
 	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
 	
 	ASSERT(conditionLock->isHeldByCurrentThread()); //a lock should have been acquired by current thread before Wait
@@ -176,8 +191,10 @@ void Condition::Signal(Lock* conditionLock) {
 		scheduler->ReadyToRun(thread);
 	
 	(void) interrupt->SetLevel(oldLevel);
+#endif
 }
-void Condition::Broadcast(Lock* conditionLock) { 
+void Condition::Broadcast(Lock* conditionLock) {
+#ifdef CHANGED
 	IntStatus oldLevel = interrupt->SetLevel(IntOff);	// disable interrupts
 	ASSERT(conditionLock->isHeldByCurrentThread()); //a lock should have been acquired by current thread before Wait
 	
@@ -189,4 +206,5 @@ void Condition::Broadcast(Lock* conditionLock) {
 	}
 	
 	(void) interrupt->SetLevel(oldLevel);
+#endif
 }

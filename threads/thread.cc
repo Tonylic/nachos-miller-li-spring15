@@ -42,12 +42,13 @@ Thread::Thread(char* threadName)
     space = NULL;
 #endif
 }
-
+#ifdef CHANGED
 Thread::Thread(char* debugName, int priority)
 {
 	name = debugName;
 	priorityLevel = priority;
 }
+#endif
 
 //----------------------------------------------------------------------
 // Thread::~Thread
@@ -230,11 +231,12 @@ Thread::Sleep ()
         
     scheduler->Run(nextThread); // returns when we've been signalled
 }
-
+#ifdef CHANGED
 int Thread::getPriorityLevel()//return the private member priorityLevel
 {
 	return priorityLevel;
 }
+#endif
 
 //----------------------------------------------------------------------
 // ThreadFinish, InterruptEnable, ThreadPrint

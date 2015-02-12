@@ -28,9 +28,12 @@
 //----------------------------------------------------------------------
 
 Scheduler::Scheduler()
-{ 
-    //readyList = new List; 
+{
+#ifdef CHANGED
     readyList = new std::priority_queue<Thread*, std::vector<Thread*>, MyCmp>;
+#else
+    readyList = new List;
+#endif
 } 
 
 //----------------------------------------------------------------------
@@ -57,8 +60,11 @@ Scheduler::ReadyToRun (Thread *thread)
     DEBUG('t', "Putting thread %s on ready list.\n", thread->getName());
 
     thread->setStatus(READY);
-    //readyList->Append((void *)thread);
+#ifdef CHANGED
     readyList->push(thread);
+#else
+    readyList->Append((void *)thread);
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -72,7 +78,7 @@ Scheduler::ReadyToRun (Thread *thread)
 Thread *
 Scheduler::FindNextToRun ()
 {
-    //return (Thread *)readyList->Remove();
+#ifdef CHANGED
     Thread* thread;
     if(readyList->empty())
     	thread = NULL;
@@ -82,6 +88,9 @@ Scheduler::FindNextToRun ()
     	readyList->pop();
     }
     return thread;
+#else
+    return (Thread *)readyList->Remove();
+#endif
 }
 
 //----------------------------------------------------------------------
@@ -154,7 +163,7 @@ void
 Scheduler::Print()
 {
     printf("Ready list contents:\n");
-    //readyList->Mapcar((VoidFunctionPtr) ThreadPrint);
+#ifdef CHANGED
     std::vector<Thread*> temp(readyList->size());
     std::copy(&(readyList->top()), &(readyList->top()) + readyList->size(), &temp[0]);//copy priority queue to a vector
     
@@ -165,4 +174,7 @@ Scheduler::Print()
     	DEBUG('l', (char *) "In Scheduler Print, about to invoke %x(%x)\n", ThreadPrint, t);
     	ThreadPrint((int)t);
     }
+#else
+    readyList->Mapcar((VoidFunctionPtr) ThreadPrint);
+#endif
 }

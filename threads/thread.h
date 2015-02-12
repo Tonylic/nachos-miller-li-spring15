@@ -102,9 +102,9 @@ class Thread {
     void setStatus(ThreadStatus st) { status = st; }
     char* getName() { return (name); }
     void Print() { printf("%s, ", name); }
-    
+#ifdef CHANGED
     int getPriorityLevel();
-
+#endif
   private:
     // some of the private data for this class is listed above
     
@@ -113,8 +113,9 @@ class Thread {
 					// (If NULL, don't deallocate stack)
     ThreadStatus status;		// ready, running or blocked
     char* name;
+#ifdef CHANGED
 	int priorityLevel; //0 is high priority, 1 is low priority
-	
+#endif
     void StackAllocate(VoidFunctionPtr func, int arg);
     					// Allocate a stack for thread.
 					// Used internally by Fork()

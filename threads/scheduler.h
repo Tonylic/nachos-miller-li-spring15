@@ -13,6 +13,7 @@
 #include "list.h"
 #include "thread.h"
 
+#ifdef CHANGED
 #include <queue>
 
 
@@ -28,6 +29,7 @@ class MyCmp//functor, for priority queue
 		return t1->getPriorityLevel() > t2->getPriorityLevel(); //the smallest priority level would be at the front of queue
 	}
 };
+#endif
 
 class Scheduler {
   public:
@@ -41,9 +43,12 @@ class Scheduler {
     void Print();			// Print contents of ready list
     
   private:
-	std::priority_queue<Thread*, std::vector<Thread*>, MyCmp> *readyList; //for thread which has priority level
-    //List *readyList;  		// queue of threads that are ready to run,
+#ifdef CHANGED
+    std::priority_queue<Thread*, std::vector<Thread*>, MyCmp> *readyList; //for thread which has priority level
+#else
+    List *readyList;  		// queue of threads that are ready to run,
 				// but not running
+#endif
 };
 
 #endif // SCHEDULER_H
