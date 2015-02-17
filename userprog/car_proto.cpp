@@ -37,6 +37,29 @@ int OneVehicle( int dir )
 	}
 };
 
+/**
+ * A car arrives at the bridge.
+ * 
+ * dir: which direction is it travelling (0 or 1)
+ * 
+ * A car, when it arrives, checks which direction the traffic is travelling,
+ * if it travelling in the correct direction OR there are exactly 0 cars
+ * travelling in either direction it attempts to cross. If the direction
+ * does not match and there are cars crossing it blocks.
+ * 
+ * Once it has confirmed it can try to cross it tests how many cars
+ * are on the bridge, if it is less than 3 it can cross, it also
+ * notifies a number of cars proportional to the free space
+ * (ex if there is now 1 car, the current car crossing, it signals
+ * two times) to the condition that matches this direction to allow
+ * more cars to cross.
+ * 
+ * NOTE: This method can lead to starvation of the opposite side!
+ * 
+ * When a car has been block and then awoken it returns to the initial check,
+ * of is the direction matching or are there exactly 0 cars on the bridge and
+ * then blocks/continues accordingly.
+ */
 int ArriveBridge( int dir )
 {
 	DEBUG( DEBUG_FLAG, "A car has arrived going in direction: %d\n", dir );
@@ -45,9 +68,10 @@ int ArriveBridge( int dir )
 		/* we check if the direction is ours and THEN if we can get on OR
 			if there are even any cars on the bridge, if there are no cars
 			we may cross immediately */
+		DIR0_CHECK:
 		if( CUR_DIR == 0 || ( DIR0_COUNT == 0 && DIR1_COUNT == 1 ) )
 		{
-			DIR0_CHECK:
+			CUR_DIR = 0; // in case there were 0 cars crossing
 			Lock->Acquire(); // lock it up
 			if( DIR0_COUNT < MAX_LOAD ) // space for us on the bridge
 			{
@@ -80,9 +104,10 @@ int ArriveBridge( int dir )
 		/* we check if the direction is ours and THEN if we can get on OR
 			if there are even any cars on the bridge, if there are no cars
 			we may cross immediately */
+		DIR1_CHECK:
 		if( CUR_DIR == 1 || ( DIR0_COUNT == 0 && DIR1_COUNT == 1 ) )
 		{
-			DIR1_CHECK:
+			CUR_DIR = 1; // in case no one was crossing
 			Lock->Acquire(); // lock it up
 			if( DIR1_COUNT < MAX_LOAD ) // space for us on the bridge
 			{
@@ -118,12 +143,32 @@ int ArriveBridge( int dir )
 	}
 };
 
+/**
+ * Print a simple message of when a car is crossing
+ * eg has returned from ArriveBridge()
+ */
 int CrossBridge( int dir )
 {
 	DEBUG( DEBUG_FLAG, "A car is crossing the bridge in direction: %d\n", dir );
 	return 0;
 };
 
+/**
+ * A car has finished crossing and runs the exit
+ * procedure
+ * 
+ * dir: the direction of crossing.
+ *
+ * Once a car has returned from both arrive and cross it
+ * reduces the counter corresponding to its direction.
+ * If this reduces the counter to 0, eg there are now exactly
+ * 0 cars on the bridge it will change the CUR_DIR to the opposite
+ * side and then signal the opposite condition variable.
+ * 
+ * This method tries to retain some measure of fairness and reduce
+ * the possibility of starvation. Though it is possible that one
+ * direction is still starved.
+ */
 int ExitBridge( int dir )
 {
 	DEBUG( DEBUG_FLAG, "A car has exited going in direction: %d\n", dir );
@@ -133,7 +178,7 @@ int ExitBridge( int dir )
 		--DIR0_COUNT;
 		if( DIR0_COUNT == 0 ) // there are no more cars crossing currently
 		{
-			dir = 1; // change the dir so other people might go
+			CUR_DIR = 1; // change the dir so other people might go
 			/* it is important to NOTE: if no cars are waiting the system does not
 				deadlock due to this signal being lost due to the way that
 				ArriveBridge() is structured. */
@@ -157,7 +202,7 @@ int ExitBridge( int dir )
 		--DIR1_COUNT;
 		if( DIR1_COUNT == 0 ) // there are no more cars crossing currently
 		{
-			dir = 0; // change the dir so other people might go
+			CUR_DIR = 0; // change the dir so other people might go
 			/* it is important to NOTE: if no cars are waiting the system does not
 				deadlock due to this signal being lost due to the way that
 				ArriveBridge() is structured. */
@@ -181,5 +226,5 @@ int ExitBridge( int dir )
 		errno = EINVAL;
 		return -1;
 	}	
-}
+};
 	
