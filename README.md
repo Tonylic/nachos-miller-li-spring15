@@ -1,4 +1,10 @@
 # nachos-miller-li-spring15
+AUTHORS: Can Li, Greg Miller
+DATE UPDATED: 2/17/15
+SLIP DAYS REMAINING (resp.): ??, 4
+SLIP DAYS USED (resp.): 0, 0
+
+Answers To Questions ::
 4. (a)Three things may cause time to advance:
 1). interrupts are turned on or off
 2). a user program instruction is executed
