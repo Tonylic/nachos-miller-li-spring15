@@ -98,7 +98,7 @@ int ArriveBridge( int dir )
 			Car_Lock->Release( Car_Lock );
 			CV_DIR0->Wait( CV_DIR0 );
 			/* *gasp!* a GOTO to recheck the condition when someone wakes us */
-			GOTO DIR0_CHECK; 
+			goto DIR0_CHECK; 
 		}
 	}
 	else if( dir == 1 ) // this is a mirror of the above code save checking against DIR1
@@ -134,7 +134,7 @@ int ArriveBridge( int dir )
 			Car_Lock->Release( Car_Lock );
 			CV_DIR1->Wait( CV_DIR1 );
 			/* *gasp!* a GOTO to recheck the condition when someone wakes us */
-			GOTO DIR1_CHECK; 
+			goto DIR1_CHECK; 
 		}
 	}
 	else
