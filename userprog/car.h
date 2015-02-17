@@ -11,4 +11,5 @@ class Car : public Thread {
 		Car();
 		Car( int, char* ); // we will just use the default priority
 		int dir;
+		void Fork( VoidFunctionPtr func, int arg );
 };

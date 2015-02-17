@@ -32,3 +32,9 @@ Car::Car( int i, char *debugname ) : Thread( debugname )
 	}
 	dir = i;
 };
+
+/** run this thread */
+void Car::Fork( VoidFunctionPtr func, int arg )
+{
+	Thread::Fork( func, arg );
+};
