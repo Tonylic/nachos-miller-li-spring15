@@ -1,9 +1,13 @@
+#ifndef NACHOS_CAR_PROTO_CPP
+#define NACHOS_CAR_PROTO_CPP
+
 #include <errno.h>
-#include <stdio.h>
+#include <cstdio>
+#include <cstdlib>
 #include "car_proto.h"
 
-#DEFINE MAX_LOAD 3
-#DEFINE DEBUG_FLAG t
+#define MAX_LOAD 3
+#define DEBUG_FLAG 't'
 
 /**
  * A car arrives at the bridge, attempts to cross it
@@ -28,14 +32,11 @@ void OneVehicle( int dir )
 			return;
 		}
 		CrossBridge( dir ); // should not be able to fail assuming dir is 0 or 1
-		else if( ExitBridge( dir ) != 0 )
+		if( ExitBridge( dir ) != 0 )
 		{
 			return;
 		}
-		else
-		{
-			return;
-		}
+		return;
 	}
 };
 
@@ -81,22 +82,22 @@ int ArriveBridge( int dir )
 				/* let some cars go, it does not matter if they are waiting or not 
 					we hold the lock and continue execution (MESA) if someone is
 					waiting they are awoken eventually to go and will recheck the cv */
-				for( int i = DIR0_COUNT; i < MAX_LOAD; ++i ) CV_DIR1->Signal( CV_DIR1 );
-				Car_Lock->Release( Car_Lock );
+				for( int i = DIR0_COUNT; i < MAX_LOAD; ++i ) CV_DIR1->Signal( CV_DIR1_LOCK );
+				Car_Lock->Release();
 				return 0;
 			}
 			else // no room we have to wait
 			{
-				Car_Lock->Release( Car_Lock );
-				CV_DIR0->Wait( CV_DIR0 );
+				Car_Lock->Release();
+				CV_DIR0->Wait( CV_DIR0_LOCK );
 				/* *gasp!* a GOTO to recheck the condition when someone wakes us */
-				GOTO DIR0_CHECK;
+				goto DIR0_CHECK;
 			}
 		}
 		else // not going our way so we wait
 		{
-			Car_Lock->Release( Car_Lock );
-			CV_DIR0->Wait( CV_DIR0 );
+			Car_Lock->Release();
+			CV_DIR0->Wait( CV_DIR0_LOCK );
 			/* *gasp!* a GOTO to recheck the condition when someone wakes us */
 			goto DIR0_CHECK; 
 		}
@@ -117,22 +118,22 @@ int ArriveBridge( int dir )
 				/* let some cars go, it does not matter if they are waiting or not 
 					we hold the lock and continue execution (MESA) if someone is
 					waiting they are awoken eventually to go and will recheck the cv */
-				for( int i = DIR1_COUNT; i < MAX_LOAD; ++i ) CV_DIR1->Signal( CV_DIR1 );
-				Car_Lock->Releae( Car_Lock );
+				for( int i = DIR1_COUNT; i < MAX_LOAD; ++i ) CV_DIR1->Signal( CV_DIR1_LOCK );
+				Car_Lock->Release();
 				return 0;
 			}
 			else // no room we have to wait
 			{
-				Car_Lock->Release( Car_Lock );
-				CV_DIR1->Wait( CV_DIR1 );
+				Car_Lock->Release();
+				CV_DIR1->Wait( CV_DIR1_LOCK );
 				/* *gasp!* a GOTO to recheck the condition when someone wakes us */
-				GOTO DIR1_CHECK;
+				goto DIR1_CHECK;
 			}
 		}
 		else // not going our way so we wait
 		{
-			Car_Lock->Release( Car_Lock );
-			CV_DIR1->Wait( CV_DIR1 );
+			Car_Lock->Release();
+			CV_DIR1->Wait( CV_DIR1_LOCK );
 			/* *gasp!* a GOTO to recheck the condition when someone wakes us */
 			goto DIR1_CHECK; 
 		}
@@ -176,7 +177,7 @@ int ExitBridge( int dir )
 	DEBUG( DEBUG_FLAG, "A car has exited going in direction: %d\n", dir );
 	if( dir == 0 )
 	{
-		Car_Lock->Acquire( Car_Lock );
+		Car_Lock->Acquire();
 		--DIR0_COUNT;
 		if( DIR0_COUNT == 0 ) // there are no more cars crossing currently
 		{
@@ -184,23 +185,23 @@ int ExitBridge( int dir )
 			/* it is important to NOTE: if no cars are waiting the system does not
 				deadlock due to this signal being lost due to the way that
 				ArriveBridge() is structured. */
-			CV_DIR1->Signal( CV_DIR1 );
+			CV_DIR1->Signal( CV_DIR1_LOCK );
 			/* it also important to NOTE: that we can and do release the lock NOW
 			 instead of before the signal, as this is Mesa we know that we keep
 			 the CPU over the guy we just woke up */
-			Car_Lock->Release( Car_Lock );
+			Car_Lock->Release();
 			return 0;
 		}
 		else
 		{
-			Car_Lock->Release( Car_Lock );
+			Car_Lock->Release();
 			return 0;
 		}
 		return -1;
 	}
 	else if( dir == 1 ) // this a mirror of above
 	{
-		Car_Lock->Acquire( Car_Lock );
+		Car_Lock->Acquire();
 		--DIR1_COUNT;
 		if( DIR1_COUNT == 0 ) // there are no more cars crossing currently
 		{
@@ -208,16 +209,16 @@ int ExitBridge( int dir )
 			/* it is important to NOTE: if no cars are waiting the system does not
 				deadlock due to this signal being lost due to the way that
 				ArriveBridge() is structured. */
-			CV_DIR0->Signal( CV_DIR0 );
+			CV_DIR0->Signal( CV_DIR0_LOCK );
 			/* it also important to NOTE: that we can and do release the lock NOW
 			 instead of before the signal, as this is Mesa we know that we keep
 			 the CPU over the guy we just woke up */
-			Car_Lock->Release( Car_Lock );
+			Car_Lock->Release();
 			return 0;
 		}
 		else
 		{
-			Car_Lock->Release( Car_Lock );
+			Car_Lock->Release();
 			return 0;
 		}
 		return -1;
@@ -231,3 +232,5 @@ int ExitBridge( int dir )
 };
 
 void (*THREAD_RUN)(int) = &OneVehicle; // func pointer defined for threads to use
+
+#endif

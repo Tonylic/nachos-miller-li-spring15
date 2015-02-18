@@ -1,7 +1,10 @@
-#include <stdio.h>
-#include <stdlib.h>
+#ifndef NACHOS_CAR_CPP
+#define NACHOS_CAR_CPP
+
 #include <errno.h>
-#include "../threads/thread.h"
+#include <stdio.h>
+#include <cstdlib>
+#include "thread.h"
 #include "car.h"
 
 Car::Car() : Thread( "uninit car" )
@@ -38,3 +41,6 @@ void Car::Fork( VoidFunctionPtr func, int arg )
 {
 	Thread::Fork( func, arg );
 };
+
+#endif
+
