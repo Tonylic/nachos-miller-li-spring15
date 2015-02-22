@@ -1,14 +1,10 @@
 #ifndef NACHOS_CAR_H
 #define NACHOS_CAR_H
-
+#include "thread.h"
 /**
  * FILE: car.h
  * Prototype for the car thread.
  */
-
-#include "../threads/thread.h"
-#include "../threads/synch.h"
-
 class Car : public Thread {
 	public:
 		Car();

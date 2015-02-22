@@ -1,13 +1,24 @@
 #ifndef NACHOS_CAR_PROTO_CPP
 #define NACHOS_CAR_PROTO_CPP
 
-#include <errno.h>
-#include <cstdio>
-#include <cstdlib>
-#include "car_proto.h"
+#include "synch.h"
 
 #define MAX_LOAD 3
 #define DEBUG_FLAG 't'
+extern Lock *Car_Lock;
+extern Condition *CV_DIR0; // blocks one dir
+extern Condition *CV_DIR1; // blocks the other dir
+extern Lock *CV_DIR1_LOCK; // lcck for the cv
+extern Lock *CV_DIR0_LOCK; // lock for other cv
+extern int DIR0_COUNT; // counts cars on the bridge
+extern int DIR1_COUNT; // counts cars on the bridge (the other way)
+extern int CUR_DIR; // indicates which direction traffic is going
+extern void (*THREAD_RUN)(int); // func pointer for cars to use when the run
+
+void OneVehicle( int );
+int ArriveBridge( int );
+int CrossBridge( int );
+int ExitBridge( int );
 
 /**
  * A car arrives at the bridge, attempts to cross it
@@ -21,8 +32,6 @@ void OneVehicle( int dir )
 {
 	if( dir < 0 || dir > 1 )
 	{
-		errno = EINVAL;
-		perror("invalid direction!");
 		return;
 	}
 	else
@@ -140,8 +149,6 @@ int ArriveBridge( int dir )
 	}
 	else
 	{
-		perror("failed to arrive at the bridge");
-		errno = EINVAL;
 		return -1;
 	}
 };
@@ -223,10 +230,9 @@ int ExitBridge( int dir )
 		}
 		return -1;
 	}
-	else // error
+	else
 	{
-		perror("problem exiting the bridge!");
-		errno = EINVAL;
+		// error
 		return -1;
 	}	
 };
