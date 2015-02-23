@@ -2,7 +2,7 @@
 | Author | Can Li | Greg Miller |
 ---------|--------|-------------|
 | DATE UPDATED| -- | 2/22/15 |
-| SLIP DAYS REMAINING | ?? | 4 |
+| SLIP DAYS REMAINING | 4 | 4 |
 | SLIP DAYS USED | 0 | 0 |
 
 ## Bridge Question
